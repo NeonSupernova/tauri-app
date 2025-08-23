@@ -13,7 +13,7 @@
 
 <main class="container">
   <h1>Welcome to Tauri + Svelte</h1>
-
+    <a href="/test">Test Page</a>
   <div class="row">
     <a href="https://vitejs.dev" target="_blank">
       <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
