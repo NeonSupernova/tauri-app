@@ -9,6 +9,8 @@
       <excludeFolder url="file://$MODULE_DIR$/src-tauri/gen/schemas" />
       <excludeFolder url="file://$MODULE_DIR$/src-tauri/target" />
       <excludeFolder url="file://$MODULE_DIR$/wasm/target" />
+      <excludeFolder url="file://$MODULE_DIR$/src-tauri/gen" />
+      <excludeFolder url="file://$MODULE_DIR$/src-tauri/gen/apple" />
       <excludeFolder url="file://$MODULE_DIR$/src-tauri/gen/apple/Externals" />
       <excludeFolder url="file://$MODULE_DIR$/src-tauri/gen/apple/tauri-app.xcodeproj/project.xcworkspace/xcuserdata" />
     </content>
