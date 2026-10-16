@@ -1,39 +1,40 @@
-# Tauri + SvelteKit + TypeScript
+# Tauri + SvelteKit + Rust template
 
-A desktop app built with [Tauri 2](https://tauri.app), [SvelteKit 3](https://svelte.dev/docs/kit) (Svelte 5 runes),
-[Vite 8](https://vite.dev), [Tailwind CSS 4](https://tailwindcss.com) + [Skeleton 5](https://skeleton.dev),
-and a Rust → WebAssembly crate.
+A [cargo-generate](https://github.com/cargo-generate/cargo-generate) template for apps that run from one codebase
+as a **website** and as a **desktop/mobile app**, with Rust doing the heavy lifting in both:
 
-## Prerequisites
+- **SvelteKit 3** (Svelte 5, Vite 8, TypeScript 6) prerendered to static files, styled with Tailwind 4 + Skeleton 5
+- **Tauri 2** for native windows, OS APIs (plugins) and mobile
+- **Shared Rust core** (`crates/core`) compiled natively for Tauri *and* to WebAssembly for the browser
+- **Platform layer** (`src/lib/platform.ts`) that picks native Rust under Tauri and WASM on the web
+- Demos: QR codes (Rust `qrcode` crate) and a real-time canvas renderer driven by WASM memory
+- Content Security Policy on both targets, CI for the web build, Rust tests and the Tauri build
 
-- [Bun](https://bun.sh/) and Node.js ≥ 22.17
-- [Rust](https://rustup.rs/) (edition 2024) with the WASM target: `rustup target add wasm32-unknown-unknown`
-- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
-- Tauri's [system dependencies](https://v2.tauri.app/start/prerequisites/) for your OS
-
-## Development
+## Create an app
 
 ```sh
-bun install
-bun run tdev     # builds the WASM crate, starts Vite on :1420 and launches the Tauri window
-bun run tbuild   # production bundle
-bun run check    # type-check
+cargo install cargo-generate
+cargo generate NeonSupernova/tauri-app --name my-app
+cd my-app && bun install && bun run tdev
 ```
 
-## Layout
+You'll be asked for a bundle identifier (e.g. `com.yourname.myapp`) and a description; pass them with
+`--define identifier=... --define description=...` to skip the prompts. The generated project's README covers
+prerequisites, commands and how to add capabilities.
 
-| Path        | What                                                                       |
-| ----------- | -------------------------------------------------------------------------- |
-| `src/`      | SvelteKit frontend (prerendered with `adapter-static`)                     |
-| `src-tauri/`| Tauri / Rust backend; commands live in `src-tauri/src/lib.rs`              |
-| `wasm/`     | Rust crate compiled to WASM into `src/lib/wasm` (generated, git-ignored)   |
+## Working on the template
 
-SvelteKit config lives in `vite.config.ts` (passed to the `sveltekit()` plugin). Import from `src/lib`
-with `#lib/...` (Node subpath imports, configured in `package.json`).
+The repo is itself a working app with default values (`tauri-app`, `com.example.tauri-app`), so everything in
+the generated README works here too. Template-specific files:
 
-Run `bun run wasm-build` after changing the `wasm/` crate, or before `bun run dev` / `bun run check` when working
-on the frontend alone.
+| File                                | Purpose                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `cargo-generate.toml`               | Placeholders, which files get rendered, what's left out                  |
+| `src-tauri/tauri.conf.json.liquid`  | Replaces `tauri.conf.json` in generated apps; **keep the two in sync**   |
+| `README.md.liquid`                  | Becomes the generated project's README (this file is template-only)      |
+| `.github/workflows/template.yml`    | Generates a project and builds it; also fails if the `.liquid` twin drifts |
 
-## Recommended IDE Setup
+`package.json` and `src/app.html` contain `{{project-name}}`-style placeholders directly; that's harmless for the
+tools that read them.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+To try the template locally: `cargo generate --path . --name scratch-app --destination /tmp`.

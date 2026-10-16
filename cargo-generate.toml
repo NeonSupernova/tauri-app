@@ -1,0 +1,34 @@
+# Template config for `cargo generate NeonSupernova/tauri-app`.
+# See https://cargo-generate.github.io/cargo-generate/
+
+[template]
+cargo_generate_version = ">=0.23.0"
+# Only these files contain Liquid placeholders; everything else is copied verbatim, so
+# Svelte/TS syntax never has to be escaped. `*.liquid` files replace their plain twin.
+include = [
+    "package.json",
+    "README.md",
+    "src/app.html",
+    "src-tauri/tauri.conf.json",
+]
+# Not part of generated projects
+ignore = [
+    ".github/workflows/template.yml",
+    ".idea",
+    ".svelte-kit",
+    "build",
+    "node_modules",
+    "src/lib/wasm",
+    "target",
+]
+
+[placeholders.identifier]
+type = "string"
+prompt = "Bundle identifier (reverse-DNS, unique to your app, e.g. com.yourname.myapp)"
+regex = "^[a-zA-Z][a-zA-Z0-9-]*(\\.[a-zA-Z][a-zA-Z0-9-]*)+$"
+default = "com.example.app"
+
+[placeholders.description]
+type = "string"
+prompt = "Short description"
+default = "A Tauri + SvelteKit + Rust app"

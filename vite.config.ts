@@ -16,6 +16,22 @@ export default defineConfig({
     sveltekit({
       preprocess: vitePreprocess(),
       adapter: adapter(),
+      // Content Security Policy, emitted as a <meta> tag with hashes for SvelteKit's inline
+      // scripts, so it applies on the web and inside Tauri alike.
+      csp: {
+        mode: "hash",
+        directives: {
+          "default-src": ["self"],
+          // WebAssembly.instantiate needs 'wasm-unsafe-eval'
+          "script-src": ["self", "wasm-unsafe-eval"],
+          "style-src": ["self", "unsafe-inline"],
+          "img-src": ["self", "data:", "blob:"],
+          // ipc: / http://ipc.localhost carry Tauri commands; add your API origins here
+          "connect-src": ["self", "ipc:", "http://ipc.localhost"],
+          "object-src": ["none"],
+          "base-uri": ["self"],
+        },
+      },
     }),
   ],
 

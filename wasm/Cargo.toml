@@ -1,10 +1,14 @@
 [package]
-name = "wasm"
-version = "0.1.0"
-edition = "2024"
+name = "app-wasm"
+description = "Browser bindings for app-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+app-core.workspace = true
 wasm-bindgen = "0.2.129"
+
