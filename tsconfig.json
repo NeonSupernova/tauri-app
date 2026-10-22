@@ -14,7 +14,7 @@
     "useDefineForClassFields": true,
     "types": ["svelte"]
   },
-  "include": ["src/**/*", "src-tauri/**/*", "wasm/pkg/**/*"]
+  "include": ["src/**/*", "src-tauri/**/*"]
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
   // except $lib which is handled by https://kit.svelte.dev/docs/configuration#files
   //
