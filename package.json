@@ -7,13 +7,13 @@
     "#lib/*": "./src/lib/*"
   },
   "scripts": {
-    "dev": "vite dev",
+    "dev": "bun run wasm-build:dev && vite dev",
     "tdev": "tauri dev",
-    "build": "vite build",
+    "build": "bun run wasm-build && vite build",
     "tbuild": "tauri build",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "check": "bun run wasm-build && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "bun run wasm-build && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "wasm-build": "wasm-pack build wasm --target web --out-dir ../src/lib/wasm --out-name app_wasm",
     "wasm-build:dev": "wasm-pack build wasm --target web --out-dir ../src/lib/wasm --out-name app_wasm --no-opt",
     "test": "cargo test --workspace --exclude app-wasm"

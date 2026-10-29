@@ -17,7 +17,7 @@ impl Framebuffer {
     /// Render an animated plasma effect at time `t` (seconds).
     pub fn plasma(&mut self, t: f32) {
         let (w, h) = (self.width as f32, self.height as f32);
-        for (i, px) in self.pixels.chunks_exact_mut(4).enumerate() {
+        for (i, px) in self.pixels.as_chunks_mut::<4>().0.iter_mut().enumerate() {
             let x = (i as u32 % self.width) as f32 / w;
             let y = (i as u32 / self.width) as f32 / h;
             let v = (x * 10.0 + t).sin()
@@ -42,6 +42,6 @@ mod tests {
         let mut fb = Framebuffer::new(8, 4);
         fb.plasma(1.0);
         assert_eq!(fb.pixels.len(), 8 * 4 * 4);
-        assert!(fb.pixels.chunks_exact(4).all(|p| p[3] == 255));
+        assert!(fb.pixels.as_chunks::<4>().0.iter().all(|p| p[3] == 255));
     }
 }

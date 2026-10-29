@@ -18,8 +18,8 @@ runs as a website and as a desktop/mobile app, with Rust both natively (Tauri) a
 bun install
 bun run tdev        # desktop app with hot reload (builds WASM first)
 bun run tbuild      # desktop installers in target/release/bundle
-bun run wasm-build && bun run dev     # web only, http://localhost:1420
-bun run wasm-build && bun run build   # static website in build/
+bun run dev     # web only, http://localhost:1420
+bun run build   # static website in build/
 bun run check       # type-check the frontend
 bun run test        # Rust unit tests
 ```
