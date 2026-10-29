@@ -6,21 +6,6 @@ on:
 permissions:
   contents: read
 jobs:
-  resolve-lockfile:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo generate-lockfile
-      - name: Export public dependency lock for review
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          data = Path("Cargo.lock").read_text()
-          for i in range(0, len(data), 4000):
-              print("LOCKCHUNK:" + json.dumps(data[i:i+4000]))
-          PY
   validate:
     strategy:
       fail-fast: false
@@ -47,6 +32,7 @@ jobs:
       - run: bun run test:release
       - run: bun run check
       - run: bun run build
-      - run: cargo test --workspace --exclude app-wasm
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace --exclude app-wasm --locked
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: bunx tauri build --no-bundle
+      - run: git diff --exit-code -- Cargo.lock bun.lock
