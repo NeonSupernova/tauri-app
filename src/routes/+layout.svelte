@@ -2,6 +2,8 @@
   import '../app.css';
   import { onMount } from 'svelte';
   import { isTauri } from '@tauri-apps/api/core';
+  import type { Snippet } from 'svelte';
+  let { children }: { children: Snippet } = $props();
   import { checkForUpdates, installUpdate, type AvailableUpdate } from '$lib/updates';
 
   let update = $state<AvailableUpdate | null>(null);
@@ -11,7 +13,7 @@
   onMount(() => {
     // Regular development builds and browser previews must work without
     // production signing keys or an update server.
-    if (!isTauri() || !import.meta.env.VITE_UPDATES_ENABLED) return;
+    if (!isTauri() || import.meta.env.VITE_UPDATES_ENABLED !== 'true') return;
 
     void checkForUpdates()
       .then((available) => { update = available; })
