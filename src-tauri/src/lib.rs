@@ -59,9 +59,12 @@ pub fn run() {
     let builder = tauri::Builder::default().plugin(tauri_plugin_opener::init());
 
     #[cfg(desktop)]
-    let builder = builder
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .invoke_handler(tauri::generate_handler![
+    let builder = if option_env!("TAURI_UPDATER_ENABLED").is_some() {
+        builder.plugin(tauri_plugin_updater::Builder::new().build())
+    } else {
+        builder
+    }
+    .invoke_handler(tauri::generate_handler![
             greet,
             check_for_updates,
             install_update
