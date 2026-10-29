@@ -4,14 +4,15 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "bun run wasm-build && vite dev",
     "tdev": "tauri dev",
-    "build": "vite build",
+    "build": "bun run wasm-build && vite build",
     "tbuild": "tauri build",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check": "bun run wasm-build && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "wasm-build": "cd wasm && wasm-pack build --target web --out-dir ../src/lib/wasm"
+    "wasm-build": "cd wasm && wasm-pack build --target web --out-dir ../src/lib/wasm",
+    "release:prepare": "bun scripts/prepare-release.mjs"
   },
   "license": "MIT",
   "dependencies": {
