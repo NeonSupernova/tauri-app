@@ -30,7 +30,10 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: wasm32-unknown-unknown,${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: wasm32-unknown-unknown
+      - name: Install macOS cross targets
+        if: runner.os == 'macOS'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
