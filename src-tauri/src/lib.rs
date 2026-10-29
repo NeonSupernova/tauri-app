@@ -40,7 +40,7 @@ async fn install_update(
         .ok_or_else(|| "The update is no longer available".to_string())?;
 
     // Avoid silently installing a different version from the one the user approved.
-    if update.version.to_string() != expected_version {
+    if update.version != expected_version {
         return Err("The available version changed. Check for updates again.".into());
     }
 
