@@ -1,14 +1,76 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[cfg(desktop)]
+#[derive(serde::Serialize)]
+struct AvailableUpdate {
+    version: String,
+    notes: Option<String>,
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+async fn check_for_updates(app: tauri::AppHandle) -> Result<Option<AvailableUpdate>, String> {
+    use tauri_plugin_updater::UpdaterExt;
+
+    let updater = app.updater().map_err(|error| error.to_string())?;
+    let update = updater.check().await.map_err(|error| error.to_string())?;
+
+    Ok(update.map(|release| AvailableUpdate {
+        version: release.version.to_string(),
+        notes: release.body,
+    }))
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+async fn install_update(
+    app: tauri::AppHandle,
+    expected_version: String,
+) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+
+    let updater = app.updater().map_err(|error| error.to_string())?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|error| error.to_string())?
+        .ok_or_else(|| "The update is no longer available".to_string())?;
+
+    // Avoid silently installing a different version from the one the user approved.
+    if update.version.to_string() != expected_version {
+        return Err("The available version changed. Check for updates again.".into());
+    }
+
+    update
+        .download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|error| error.to_string())?;
+
+    // On Windows the updater installer may terminate the running application.
+    // On macOS/Linux the new app is launched after installation.
+    app.restart();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+    let builder = tauri::Builder::default().plugin(tauri_plugin_opener::init());
+
+    #[cfg(desktop)]
+    let builder = builder
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            check_for_updates,
+            install_update
+        ]);
+
+    #[cfg(not(desktop))]
+    let builder = builder.invoke_handler(tauri::generate_handler![greet]);
+
+    builder
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
