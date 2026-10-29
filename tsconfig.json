@@ -12,8 +12,9 @@
     "moduleResolution": "bundler",
     "target": "esnext",
     "useDefineForClassFields": true,
-    "types": ["svelte"]
+    "types": ["svelte", "vite/client"]
   },
+  "exclude": ["src/lib/wasm/**/*.js"],
   "include": ["src/**/*", "src-tauri/**/*"]
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
   // except $lib which is handled by https://kit.svelte.dev/docs/configuration#files

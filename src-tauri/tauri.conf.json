@@ -5,7 +5,7 @@
   "identifier": "com.infernalnova.tauri",
   "build": {
     "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:12255",
+    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "bun run build",
     "frontendDist": "../build"
   },
