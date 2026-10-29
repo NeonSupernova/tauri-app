@@ -4,7 +4,7 @@
   import { isTauri } from '@tauri-apps/api/core';
   import type { Snippet } from 'svelte';
   let { children }: { children: Snippet } = $props();
-  import { checkForUpdates, installUpdate, type AvailableUpdate } from '$lib/updates';
+  import { checkForUpdates, installUpdate, type AvailableUpdate } from '#lib/updates.ts';
 
   let update = $state<AvailableUpdate | null>(null);
   let installing = $state(false);

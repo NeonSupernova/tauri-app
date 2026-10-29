@@ -1,7 +1,5 @@
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+fn qr_svg(text: &str) -> Result<String, String> { app_core::qr::qr_svg(text) }
 
 #[cfg(desktop)]
 #[derive(serde::Serialize)]
@@ -15,6 +13,7 @@ struct AvailableUpdate {
 async fn check_for_updates(app: tauri::AppHandle) -> Result<Option<AvailableUpdate>, String> {
     use tauri_plugin_updater::UpdaterExt;
 
+    if option_env!("TAURI_UPDATER_ENABLED") != Some("1") { return Ok(None); }
     let updater = app.updater().map_err(|error| error.to_string())?;
     let update = updater.check().await.map_err(|error| error.to_string())?;
 
@@ -32,6 +31,7 @@ async fn install_update(
 ) -> Result<(), String> {
     use tauri_plugin_updater::UpdaterExt;
 
+    if option_env!("TAURI_UPDATER_ENABLED") != Some("1") { return Err("Updates are disabled in this build.".into()); }
     let updater = app.updater().map_err(|error| error.to_string())?;
     let update = updater
         .check()
@@ -54,26 +54,20 @@ async fn install_update(
     app.restart();
 }
 
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = tauri::Builder::default().plugin(tauri_plugin_opener::init());
-
+    let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_os::init());
     #[cfg(desktop)]
-    let builder = if option_env!("TAURI_UPDATER_ENABLED").is_some() {
-        builder.plugin(tauri_plugin_updater::Builder::new().build())
-    } else {
-        builder
-    }
-    .invoke_handler(tauri::generate_handler![
-            greet,
-            check_for_updates,
-            install_update
-        ]);
-
+    let builder = {
+        let builder = if option_env!("TAURI_UPDATER_ENABLED") == Some("1") {
+            builder.plugin(tauri_plugin_updater::Builder::new().build())
+        } else { builder };
+        builder.invoke_handler(tauri::generate_handler![qr_svg, check_for_updates, install_update])
+    };
     #[cfg(not(desktop))]
-    let builder = builder.invoke_handler(tauri::generate_handler![greet]);
-
-    builder
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    let builder = builder.invoke_handler(tauri::generate_handler![qr_svg]);
+    builder.run(tauri::generate_context!()).expect("error while running tauri application");
 }

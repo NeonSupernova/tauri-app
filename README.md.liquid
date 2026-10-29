@@ -1,0 +1,67 @@
+# {{project-name | title_case}}
+
+{{description}}
+
+Built from the [Tauri + SvelteKit + Rust template](https://github.com/NeonSupernova/tauri-app): one codebase that
+runs as a website and as a desktop/mobile app, with Rust both natively (Tauri) and in the browser (WebAssembly).
+
+## Prerequisites
+
+- [Bun](https://bun.sh/) and Node.js ≥ 22.17
+- [Rust](https://rustup.rs/) with the WASM target: `rustup target add wasm32-unknown-unknown`
+- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) (`cargo install wasm-pack`)
+- Tauri's [system dependencies](https://v2.tauri.app/start/prerequisites/) for your OS
+
+## Commands
+
+```sh
+bun install
+bun run tdev        # desktop app with hot reload (builds WASM first)
+bun run tbuild      # desktop installers in target/release/bundle
+bun run dev     # web only, http://localhost:1420
+bun run build   # static website in build/
+bun run check       # type-check the frontend
+bun run test        # Rust unit tests
+```
+
+Mobile: `bunx tauri android init` / `bunx tauri ios init`, then `bunx tauri android dev` / `bunx tauri ios dev`.
+
+## Architecture
+
+```
+crates/core   Plain Rust shared by both targets (QR codes, pixel renderer, your logic)
+   ├── src-tauri   Native backend: Tauri commands + plugins (OS APIs). Desktop/mobile only.
+   └── wasm        wasm-bindgen wrappers → src/lib/wasm (generated). Runs in any browser.
+src/lib/platform.ts  The only place that picks native vs WASM/web. Components call it.
+src/routes      SvelteKit pages (prerendered with adapter-static)
+```
+
+### Adding a capability
+
+1. Write the logic once in `crates/core` (no platform APIs; add a unit test).
+2. Expose it natively: a `#[tauri::command]` in `src-tauri/src/lib.rs`, registered in `generate_handler!`.
+3. Expose it to the browser: a `#[wasm_bindgen]` function in `wasm/src/lib.rs`.
+4. Add a function to `src/lib/platform.ts` that calls `invoke()` when `native`, else the WASM export.
+
+For OS-only features (files, notifications, …) add a [Tauri plugin](https://v2.tauri.app/plugin/), grant its
+permission in `src-tauri/capabilities/default.json`, and give `platform.ts` a web fallback (or hide the feature).
+
+### When to use WASM vs native vs JS
+
+- **WASM** pays off for heavy, self-contained compute: pixels, simulations, parsing, compression, crypto. Keep
+  JS↔WASM calls coarse (one call per frame/job) and share buffers through WASM memory like
+  `src/routes/graphics` does.
+- **Native (Tauri command)** is fastest of all and can use threads and the OS, but only exists in the app.
+- **Plain JS** is fine for small jobs; crossing into WASM for tiny work can cost more than it saves.
+
+## Notes
+
+- Import from `src/lib` with `#lib/...` (Node subpath imports, configured in `package.json`), including the
+  file extension, e.g. `#lib/platform.ts`.
+- SvelteKit config lives in `vite.config.ts`, including the Content Security Policy. Add the origins of any APIs you
+  call to `connect-src` there and in `src-tauri/tauri.conf.json`.
+- `binaryen` is a dev dependency so `wasm-pack` always uses a known-good `wasm-opt`.
+
+## Releases
+
+See [DISTRIBUTION.md](DISTRIBUTION.md) for signed releases and opt-in desktop updates.
