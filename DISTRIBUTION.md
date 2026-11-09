@@ -1,6 +1,6 @@
 # Tauri + SvelteKit + Rust/WASM starter
 
-A reusable Tauri 2 application starter using Svelte 5, SvelteKit 2, Tailwind 4, Skeleton UI, Bun, Rust and optional Rust-generated WebAssembly.
+A reusable Tauri 2 application starter using Svelte 5, SvelteKit 3, Tailwind 4, Skeleton UI, Bun, Rust and optional Rust-generated WebAssembly.
 
 ## Development
 
@@ -20,6 +20,8 @@ The frontend scripts build the WASM module automatically before starting Vite, b
 `.github/workflows/ci.yml` validates Svelte, WASM, Rust and Tauri on Linux, Windows and macOS for pushes to `main` and pull requests.
 
 `.github/workflows/release.yml` is triggered by version tags such as `v0.1.0`. It builds Windows, Linux, Intel macOS and Apple Silicon macOS packages, uploads signed updater artifacts to a draft GitHub Release and publishes that release **only after all builds succeed**. The official Tauri GitHub Action generates the updater `latest.json`.
+
+`.github/workflows/android.yml` builds an ARM64 debug APK on pushes, pull requests, and manual runs. The APK is a workflow artifact for testing, not a Play Store release. After installing the Android SDK/NDK and Java 17 locally, run `bun run android:init`, then `bun run android:dev` or `bun run android:apk`. For iOS development on macOS with Xcode, run `bun run ios:init` and `bun run ios:dev`.
 
 ## One-time release configuration
 
@@ -52,7 +54,7 @@ To prevent accidental release of a tag with unrelated versions, use a tag matchi
 
 ## Automatic updates
 
-On production desktop builds, a launch-time update check uses the official Tauri updater plugin. If a newer signed release is available, the application shows an **Install and restart** or **Later** prompt. The backend verifies that the installed version is the one the user approved before downloading and installing. The updater is disabled in ordinary local builds and browser previews. Failures are nonfatal and logged; the application remains usable.
+On production desktop builds, the official Tauri updater plugin checks on launch, every six hours while open, and when a dormant window becomes visible or regains focus. Checks are throttled to one every six hours after a successful attempt. If a newer signed release is available, the application shows an **Install and restart** or **Later** prompt. **Later** defers that version for the rest of the session. The backend verifies that the installed version is the one the user approved before downloading and installing. The updater is disabled in ordinary local builds and browser previews. Failures are nonfatal and logged; the application remains usable.
 
 The updater here is **desktop only**. Android and iOS distribution must use their respective app-store/platform release mechanisms.
 

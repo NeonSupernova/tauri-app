@@ -9,6 +9,7 @@ as a **website** and as a **desktop/mobile app**, with Rust doing the heavy lift
 - **Platform layer** (`src/lib/platform.ts`) that picks native Rust under Tauri and WASM on the web
 - Demos: QR codes (Rust `qrcode` crate) and a real-time canvas renderer driven by WASM memory
 - Content Security Policy on both targets, CI for the web build, Rust tests and the Tauri build
+- Android ARM64 debug APKs on pushes and pull requests, with APKs attached to the CI run
 
 ## Create an app
 
@@ -41,4 +42,4 @@ To try the template locally: `cargo generate --path . --name scratch-app --desti
 
 ## Releases and updates
 
-See [DISTRIBUTION.md](DISTRIBUTION.md) for signing configuration and the stable release workflow. Merge order for this change is PR #2, then #1, then #3.
+See [DISTRIBUTION.md](DISTRIBUTION.md) for signing configuration and the stable release workflow.

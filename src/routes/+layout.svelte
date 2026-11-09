@@ -9,15 +9,44 @@
   let update = $state<AvailableUpdate | null>(null);
   let installing = $state(false);
   let error = $state('');
+  let checking = false;
+  let lastCheckedAt = 0;
+  let deferredVersion: string | null = null;
+  const checkIntervalMs = 6 * 60 * 60 * 1000;
+
+  async function refreshUpdate() {
+    if (checking || installing || Date.now() - lastCheckedAt < checkIntervalMs) return;
+    checking = true;
+    lastCheckedAt = Date.now();
+    try {
+      const available = await checkForUpdates();
+      update = available?.version === deferredVersion ? null : available;
+      error = '';
+    } catch (reason) {
+      lastCheckedAt = 0;
+      console.warn('Update check failed:', reason);
+    } finally {
+      checking = false;
+    }
+  }
 
   onMount(() => {
     // Regular development builds and browser previews must work without
     // production signing keys or an update server.
     if (!isTauri() || import.meta.env.VITE_UPDATES_ENABLED !== 'true') return;
 
-    void checkForUpdates()
-      .then((available) => { update = available; })
-      .catch((reason) => console.warn('Update check failed:', reason));
+    void refreshUpdate();
+    const interval = window.setInterval(() => void refreshUpdate(), checkIntervalMs);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refreshUpdate();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
   });
 
   async function applyUpdate() {
@@ -44,7 +73,7 @@
       <button class="btn preset-filled-primary-500" disabled={installing} onclick={applyUpdate}>
         {installing ? 'Installing…' : 'Install and restart'}
       </button>
-      <button class="btn preset-tonal" disabled={installing} onclick={() => { update = null; }}>Later</button>
+      <button class="btn preset-tonal" disabled={installing} onclick={() => { deferredVersion = update?.version ?? null; update = null; }}>Later</button>
     </div>
   </aside>
 {/if}

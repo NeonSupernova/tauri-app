@@ -22,9 +22,14 @@ bun run dev     # web only, http://localhost:1420
 bun run build   # static website in build/
 bun run check       # type-check the frontend
 bun run test        # Rust unit tests
+bun run android:init # generate the Android project (SDK/NDK + Java 17 required)
+bun run android:dev  # run on an Android device or emulator
+bun run android:apk  # build an ARM64 debug APK
+bun run ios:init     # generate the iOS project (macOS + Xcode required)
+bun run ios:dev      # run on an iOS device or simulator
 ```
 
-Mobile: `bunx tauri android init` / `bunx tauri ios init`, then `bunx tauri android dev` / `bunx tauri ios dev`.
+CI also builds an Android debug APK for testing and attaches it to the workflow run.
 
 ## Architecture
 
@@ -64,4 +69,4 @@ permission in `src-tauri/capabilities/default.json`, and give `platform.ts` a we
 
 ## Releases
 
-See [DISTRIBUTION.md](DISTRIBUTION.md) for signed releases and opt-in desktop updates.
+See [DISTRIBUTION.md](DISTRIBUTION.md) for signed releases and automatic desktop update checks. Each production app needs its own updater signing key and repository configuration.
